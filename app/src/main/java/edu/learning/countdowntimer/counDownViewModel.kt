@@ -19,8 +19,14 @@ class counDownViewModel : ViewModel() {
     private val isPaused = MutableLiveData(false)
     val paused : LiveData<Boolean> get() = isPaused
 
-    fun startTimer(){
+    fun startTimer(time : Long = 10000){
+        if(_remainingTime > 0)
+            stopTimer()
+        runTimer(time)
+    }
 
+    fun pauseTimer() {
+        timer.cancel()
     }
 
     fun resumeTimer() {
@@ -28,10 +34,18 @@ class counDownViewModel : ViewModel() {
     }
 
     fun stopTimer() {
-
+        timer.cancel()
+        clearValues()
     }
 
-    private fun runTimer(time : Long = 10000) {
+    private fun clearValues() {
+        _remainingTime = 0L
+        isPaused.value = false
+        _seconds.value = 0.0
+        _deciSeconds.value = 0.0
+    }
+
+    private fun runTimer(time : Long) {
         timer = object : CountDownTimer(time, 100){
             override fun onTick(timeLeft: Long) {
                 _remainingTime = timeLeft
@@ -42,7 +56,7 @@ class counDownViewModel : ViewModel() {
             }
 
             override fun onFinish() {
-                _remainingTime = 0L
+                clearValues()
             }
         }.start()
     }
